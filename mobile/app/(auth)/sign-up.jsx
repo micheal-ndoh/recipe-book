@@ -10,11 +10,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSignUp, useOAuth } from "@clerk/clerk-expo";
-import * as WebBrowser from "expo-web-browser";
 
 import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
-
-WebBrowser.maybeCompleteAuthSession();
 import { useState } from "react";
 import { authStyles } from "../../assets/styles/auth.styles";
 import { Image } from "expo-image";

@@ -1,10 +1,7 @@
 import { useSignIn, useOAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 
 import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
-
-WebBrowser.maybeCompleteAuthSession();
 import { useState } from "react";
 import {
   View,
