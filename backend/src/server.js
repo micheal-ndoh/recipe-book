@@ -12,6 +12,10 @@ if (ENV.NODE_ENV === "production") job.start();
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Recipe Book API is running" });
+});
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true });
 });
@@ -77,3 +81,5 @@ app.delete("/api/favorites/:userId/:recipeId", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on PORT:", PORT);
 });
+
+export default app;
