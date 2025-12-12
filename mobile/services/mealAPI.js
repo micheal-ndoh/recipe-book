@@ -114,8 +114,6 @@ export const MealAPI = {
         ? meal.strInstructions.substring(0, 120) + "..."
         : "Delicious meal from TheMealDB",
       image: meal.strMealThumb,
-      cookTime: "30 minutes",
-      servings: 4,
       category: meal.strCategory || "Main Course",
       area: meal.strArea,
       ingredients,

@@ -18,7 +18,7 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/favorites", async (req, res) => {
   try {
-    const { userId, recipeId, title, image, cookTime, servings } = req.body;
+    const { userId, recipeId, title, image } = req.body;
 
     if (!userId || !recipeId || !title) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -31,8 +31,6 @@ app.post("/api/favorites", async (req, res) => {
         recipeId,
         title,
         image,
-        cookTime,
-        servings,
       })
       .returning();
 
@@ -76,6 +74,6 @@ app.delete("/api/favorites/:userId/:recipeId", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on PORT:", PORT);
 });

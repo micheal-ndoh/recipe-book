@@ -12,7 +12,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../../constants/colors";
 
 import { Ionicons } from "@expo/vector-icons";
-import { WebView } from "react-native-webview";
 
 const RecipeDetailScreen = () => {
   const { id: recipeId } = useLocalSearchParams();
@@ -45,12 +44,7 @@ const RecipeDetailScreen = () => {
         if (mealData) {
           const transformedRecipe = MealAPI.transformMealData(mealData);
 
-          const recipeWithVideo = {
-            ...transformedRecipe,
-            youtubeUrl: mealData.strYoutube || null,
-          };
-
-          setRecipe(recipeWithVideo);
+          setRecipe(transformedRecipe);
         }
       } catch (error) {
         console.error("Error loading recipe detail:", error);
@@ -63,11 +57,6 @@ const RecipeDetailScreen = () => {
     loadRecipeDetail();
   }, [recipeId, userId]);
 
-  const getYouTubeEmbedUrl = (url) => {
-    // example url: https://www.youtube.com/watch?v=mTvlmY4vCug
-    const videoId = url.split("v=")[1];
-    return `https://www.youtube.com/embed/${videoId}`;
-  };
 
   const handleToggleSave = async () => {
     setIsSaving(true);
@@ -93,8 +82,6 @@ const RecipeDetailScreen = () => {
             recipeId: parseInt(recipeId),
             title: recipe.title,
             image: recipe.image,
-            cookTime: recipe.cookTime,
-            servings: recipe.servings,
           }),
         });
 
@@ -169,54 +156,7 @@ const RecipeDetailScreen = () => {
         </View>
 
         <View style={recipeDetailStyles.contentSection}>
-          {/* QUICK STATS */}
-          <View style={recipeDetailStyles.statsContainer}>
-            <View style={recipeDetailStyles.statCard}>
-              <LinearGradient
-                colors={["#FF6B6B", "#FF8E53"]}
-                style={recipeDetailStyles.statIconContainer}
-              >
-                <Ionicons name="time" size={20} color={COLORS.white} />
-              </LinearGradient>
-              <Text style={recipeDetailStyles.statValue}>{recipe.cookTime}</Text>
-              <Text style={recipeDetailStyles.statLabel}>Prep Time</Text>
-            </View>
 
-            <View style={recipeDetailStyles.statCard}>
-              <LinearGradient
-                colors={["#4ECDC4", "#44A08D"]}
-                style={recipeDetailStyles.statIconContainer}
-              >
-                <Ionicons name="people" size={20} color={COLORS.white} />
-              </LinearGradient>
-              <Text style={recipeDetailStyles.statValue}>{recipe.servings}</Text>
-              <Text style={recipeDetailStyles.statLabel}>Servings</Text>
-            </View>
-          </View>
-
-          {recipe.youtubeUrl && (
-            <View style={recipeDetailStyles.sectionContainer}>
-              <View style={recipeDetailStyles.sectionTitleRow}>
-                <LinearGradient
-                  colors={["#FF0000", "#CC0000"]}
-                  style={recipeDetailStyles.sectionIcon}
-                >
-                  <Ionicons name="play" size={16} color={COLORS.white} />
-                </LinearGradient>
-
-                <Text style={recipeDetailStyles.sectionTitle}>Video Tutorial</Text>
-              </View>
-
-              <View style={recipeDetailStyles.videoCard}>
-                <WebView
-                  style={recipeDetailStyles.webview}
-                  source={{ uri: getYouTubeEmbedUrl(recipe.youtubeUrl) }}
-                  allowsFullscreenVideo
-                  mediaPlaybackRequiresUserAction={false}
-                />
-              </View>
-            </View>
-          )}
 
           {/* INGREDIENTS SECTION */}
           <View style={recipeDetailStyles.sectionContainer}>
