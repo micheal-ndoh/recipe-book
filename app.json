@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "75d4d1e9-219d-4efe-836d-ba61ad6438d7"
+      }
+    },
+    "android": {
+      "package": "com.michael9.recipeapp"
+    }
+  }
+}

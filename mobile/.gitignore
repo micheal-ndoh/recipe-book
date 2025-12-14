@@ -8,7 +8,8 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
-.expo
+.expo/
+/home/micheal-ndoh/Desktop/recipe-app/mobile/.expo
 # Native
 .kotlin/
 *.orig.*
