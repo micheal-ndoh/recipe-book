@@ -25,7 +25,9 @@
       "favicon": "./assets/images/favicon.png"
     },
     "linking": {
-      "prefixes": ["mobile://"],
+      "prefixes": [
+        "mobile://"
+      ],
       "config": {
         "screens": {
           "oauth-native-callback": "index"
@@ -52,7 +54,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1cc33095-ce11-4703-a142-d18076c93dca"
+        "projectId": "32aedd4a-6d36-460a-8995-482363492967"
       },
       "clerkPublishableKey": "pk_test_cmVhZHktdG9tY2F0LTcwLmNsZXJrLmFjY291bnRzLmRldiQ"
     }
