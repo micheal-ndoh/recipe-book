@@ -30,7 +30,7 @@
       ],
       "config": {
         "screens": {
-          "oauth-native-callback": "index"
+          "oauth-native-callback": "oauth-native-callback"
         }
       }
     },

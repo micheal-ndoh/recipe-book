@@ -58,13 +58,8 @@ const SignUpScreen = () => {
     if (!isLoaded) return;
 
     try {
-      const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow();
-
-      if (createdSessionId) {
-        await setActive({ session: createdSessionId });
-      } else {
-        // Use signIn or signUp for next steps such as MFA
-      }
+      await startOAuthFlow();
+      // The OAuth callback will handle session creation and redirect
     } catch (err) {
       console.error("OAuth error", err);
       Alert.alert("Error", "Sign up with Google failed. Please try again.");
