@@ -33,6 +33,13 @@ jobs:
           cd mobile
           npm install
 
+      - name: Login to Expo
+        run: |
+          cd mobile
+          eas whoami
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
       - name: Run EAS workflow
         run: |
           cd mobile

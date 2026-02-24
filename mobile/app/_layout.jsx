@@ -14,8 +14,8 @@ export default function RootLayout() {
     <ClerkProvider
       publishableKey={clerkPublishableKey}
       tokenCache={tokenCache}
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
+      afterSignInUrl="/(tabs)/index"
+      afterSignUpUrl="/(tabs)/index"
     >
       <SafeScreen>
         <Slot />
