@@ -1,0 +1,63 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          cd mobile
+          npm install
+
+      - name: Build APK with EAS
+        run: |
+          cd mobile
+          eas build --platform android --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download build artifact
+        run: |
+          cd mobile
+          eas build:view -p android --limit 1 --json > build-info.json
+          BUILD_ID=$(cat build-info.json | jq -r '.[0].id')
+          eas build:download -p android --build-id $BUILD_ID --output-path ./recipe-book.apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: mobile/recipe-book.apk
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Release ${{ github.ref_name }}
+            
+            This release includes the APK build for Recipe Book app.
+            
+            ### Installation
+            1. Download the `recipe-book.apk` file below
+            2. Install on your Android device
+            
+            Built with EAS Build from tag ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
