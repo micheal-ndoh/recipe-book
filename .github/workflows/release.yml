@@ -36,18 +36,14 @@ jobs:
       - name: Run EAS workflow
         run: |
           cd mobile
-          eas workflow:run ../.eas/workflows/create-production-builds.yml --non-interactive
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_TOKEN="${{ secrets.EXPO_TOKEN }}" eas workflow:run ../.eas/workflows/create-production-builds.yml --non-interactive
 
       - name: Download build artifact
         run: |
           cd mobile
-          eas build:view -p android --limit 1 --json > build-info.json
+          EXPO_TOKEN="${{ secrets.EXPO_TOKEN }}" eas build:view -p android --limit 1 --json > build-info.json
           BUILD_ID=$(cat build-info.json | jq -r '.[0].id')
-          eas build:download -p android --build-id $BUILD_ID --output-path ./recipe-book.apk
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_TOKEN="${{ secrets.EXPO_TOKEN }}" eas build:download -p android --build-id $BUILD_ID --output-path ./recipe-book.apk
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
