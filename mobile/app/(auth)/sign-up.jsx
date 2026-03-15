@@ -1,21 +1,22 @@
+import { useOAuth, useSignUp } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
 import {
-  View,
-  Text,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useSignUp, useOAuth } from "@clerk/clerk-expo";
 
-import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
+import { Image } from "expo-image";
 import { useState } from "react";
 import { authStyles } from "../../assets/styles/auth.styles";
-import { Image } from "expo-image";
 import { COLORS } from "../../constants/colors";
+import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
 
 import { Ionicons } from "@expo/vector-icons";
 import VerifyEmail from "./verify-email";
@@ -23,7 +24,7 @@ import VerifyEmail from "./verify-email";
 const SignUpScreen = () => {
   useWarmUpBrowser();
   const router = useRouter();
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded, signUp } = useSignUp();
 
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
   const [email, setEmail] = useState("");
@@ -32,9 +33,23 @@ const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
 
+  // Get the OAuth redirect URL for Clerk
+  const getRedirectUrl = () => {
+    // For web development
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "localhost"
+    ) {
+      return Linking.createURL("oauth-native-callback", { scheme: "http" });
+    }
+    return Linking.createURL("oauth-native-callback");
+  };
+
   const handleSignUp = async () => {
-    if (!email || !password) return Alert.alert("Error", "Please fill in all fields");
-    if (password.length < 6) return Alert.alert("Error", "Password must be at least 6 characters");
+    if (!email || !password)
+      return Alert.alert("Error", "Please fill in all fields");
+    if (password.length < 6)
+      return Alert.alert("Error", "Password must be at least 6 characters");
 
     if (!isLoaded) return;
 
@@ -47,7 +62,10 @@ const SignUpScreen = () => {
 
       setPendingVerification(true);
     } catch (err) {
-      Alert.alert("Error", err.errors?.[0]?.message || "Failed to create account");
+      Alert.alert(
+        "Error",
+        err.errors?.[0]?.message || "Failed to create account",
+      );
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setLoading(false);
@@ -58,16 +76,23 @@ const SignUpScreen = () => {
     if (!isLoaded) return;
 
     try {
-      await startOAuthFlow();
-      // The OAuth callback will handle session creation and redirect
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl: getRedirectUrl(),
+      });
+
+      if (createdSessionId) {
+        setActive({ session: createdSessionId });
+      }
     } catch (err) {
-      console.error("OAuth error", err);
+      console.error("OAuth error:", err);
       Alert.alert("Error", "Sign up with Google failed. Please try again.");
     }
   };
 
   if (pendingVerification)
-    return <VerifyEmail email={email} onBack={() => setPendingVerification(false)} />;
+    return (
+      <VerifyEmail email={email} onBack={() => setPendingVerification(false)} />
+    );
 
   return (
     <View style={authStyles.container}>
@@ -130,7 +155,10 @@ const SignUpScreen = () => {
 
             {/* Sign Up Button */}
             <TouchableOpacity
-              style={[authStyles.authButton, loading && authStyles.buttonDisabled]}
+              style={[
+                authStyles.authButton,
+                loading && authStyles.buttonDisabled,
+              ]}
               onPress={handleSignUp}
               disabled={loading}
               activeOpacity={0.8}
@@ -154,13 +182,19 @@ const SignUpScreen = () => {
               activeOpacity={0.8}
             >
               <Ionicons name="logo-google" size={24} color="#fff" />
-              <Text style={authStyles.googleButtonText}>Sign Up with Google</Text>
+              <Text style={authStyles.googleButtonText}>
+                Sign Up with Google
+              </Text>
             </TouchableOpacity>
 
             {/* Sign In Link */}
-            <TouchableOpacity style={authStyles.linkContainer} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={authStyles.linkContainer}
+              onPress={() => router.back()}
+            >
               <Text style={authStyles.linkText}>
-                Already have an account? <Text style={authStyles.link}>Sign In</Text>
+                Already have an account?{" "}
+                <Text style={authStyles.link}>Sign In</Text>
               </Text>
             </TouchableOpacity>
           </View>

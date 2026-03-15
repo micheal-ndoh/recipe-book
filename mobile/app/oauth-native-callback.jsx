@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useAuth, useSignUp } from '@clerk/clerk-expo';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { View, ActivityIndicator, Text } from 'react-native';
+import { useAuth } from "@clerk/clerk-expo";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 export default function OAuthCallback() {
   const { isLoaded, setActive, isSignedIn } = useAuth();
@@ -13,32 +13,30 @@ export default function OAuthCallback() {
 
     const handleOAuthCallback = async () => {
       try {
-        console.log('OAuth callback params:', params);
-        
+        console.log("OAuth callback params:", params);
+
         // If user is already signed in, redirect to main app
         if (isSignedIn) {
-          router.replace('/(tabs)/index');
+          router.replace("/recipes");
           return;
         }
 
         // Extract session ID from callback
         const { created_session_id } = params;
-        
-        if (created_session_id && typeof created_session_id === 'string') {
-          console.log('Setting active session:', created_session_id);
+
+        if (created_session_id && typeof created_session_id === "string") {
+          console.log("Setting active session:", created_session_id);
           await setActive({ session: created_session_id });
-          // Small delay to ensure session is fully set
-          setTimeout(() => {
-            router.replace('/(tabs)/index');
-          }, 100);
+          // Redirect to main app
+          router.replace("/recipes");
         } else {
-          console.log('No session ID found, redirecting to sign in');
-          router.replace('/(auth)/sign-in');
+          console.log("No session ID found, redirecting to sign in");
+          router.replace("/sign-in");
         }
       } catch (error) {
-        console.error('OAuth callback error:', error);
+        console.error("OAuth callback error:", error);
         // On error, redirect to sign in
-        router.replace('/(auth)/sign-in');
+        router.replace("/sign-in");
       }
     };
 
@@ -46,11 +44,25 @@ export default function OAuthCallback() {
   }, [isLoaded, params, setActive, router, isSignedIn]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+    <View style={styles.container}>
       <ActivityIndicator size="large" color="#007AFF" />
-      <Text style={{ marginTop: 20, textAlign: 'center', color: '#666' }}>
-        Completing sign in...
-      </Text>
+      <Text style={styles.text}>Completing sign in...</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  text: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666",
+    fontSize: 16,
+  },
+});

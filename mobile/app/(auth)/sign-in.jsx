@@ -1,19 +1,20 @@
-import { useSignIn, useOAuth } from "@clerk/clerk-expo";
+import { useOAuth, useSignIn } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 
-import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-  View,
-  Text,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
 
 import { Image } from "expo-image";
 
@@ -35,6 +36,18 @@ const SignInScreen = () => {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
 
+  // Get the OAuth redirect URL for Clerk
+  const getRedirectUrl = () => {
+    // For web development
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "localhost"
+    ) {
+      return Linking.createURL("oauth-native-callback", { scheme: "http" });
+    }
+    return Linking.createURL("oauth-native-callback");
+  };
+
   const handleSignIn = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
@@ -53,6 +66,7 @@ const SignInScreen = () => {
 
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
+        router.replace("/");
       } else if (signInAttempt.status === "needs_second_factor") {
         setPendingVerification(true);
       } else {
@@ -80,6 +94,7 @@ const SignInScreen = () => {
 
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
+        router.replace("/");
       } else {
         Alert.alert("Error", "Verification failed. Please try again.");
         console.error(JSON.stringify(signInAttempt, null, 2));
@@ -96,10 +111,15 @@ const SignInScreen = () => {
     if (!isLoaded) return;
 
     try {
-      await startOAuthFlow();
-      // The OAuth callback will handle session creation and redirect
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl: getRedirectUrl(),
+      });
+
+      if (createdSessionId) {
+        setActive({ session: createdSessionId });
+      }
     } catch (err) {
-      console.error("OAuth error", err);
+      console.error("OAuth error:", err);
       Alert.alert("Error", "Sign in with Google failed. Please try again.");
     }
   };
@@ -161,78 +181,86 @@ const SignInScreen = () => {
             </View>
           ) : (
             <View style={authStyles.formContainer}>
-            {/* Email Input */}
-            <View style={authStyles.inputContainer}>
-              <TextInput
-                style={authStyles.textInput}
-                placeholder="Enter email"
-                placeholderTextColor={COLORS.textLight}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            {/* PASSWORD INPUT */}
-            <View style={authStyles.inputContainer}>
-              <TextInput
-                style={authStyles.textInput}
-                placeholder="Enter password"
-                placeholderTextColor={COLORS.textLight}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                style={authStyles.eyeButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color={COLORS.textLight}
+              {/* Email Input */}
+              <View style={authStyles.inputContainer}>
+                <TextInput
+                  style={authStyles.textInput}
+                  placeholder="Enter email"
+                  placeholderTextColor={COLORS.textLight}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                 />
+              </View>
+
+              {/* PASSWORD INPUT */}
+              <View style={authStyles.inputContainer}>
+                <TextInput
+                  style={authStyles.textInput}
+                  placeholder="Enter password"
+                  placeholderTextColor={COLORS.textLight}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  style={authStyles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color={COLORS.textLight}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  authStyles.authButton,
+                  loading && authStyles.buttonDisabled,
+                ]}
+                onPress={handleSignIn}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={authStyles.buttonText}>
+                  {loading ? "Signing In..." : "Sign In"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Divider */}
+              <View style={authStyles.dividerContainer}>
+                <View style={authStyles.divider} />
+                <Text style={authStyles.dividerText}>OR</Text>
+                <View style={authStyles.divider} />
+              </View>
+
+              {/* Google Sign-In Button */}
+              <TouchableOpacity
+                style={authStyles.googleButton}
+                onPress={handleGoogleSignIn}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="logo-google" size={24} color="#fff" />
+                <Text style={authStyles.googleButtonText}>
+                  Sign In with Google
+                </Text>
+              </TouchableOpacity>
+
+              {/* Sign Up Link */}
+              <TouchableOpacity
+                style={authStyles.linkContainer}
+                onPress={() => router.push("/(auth)/sign-up")}
+              >
+                <Text style={authStyles.linkText}>
+                  Don&apos;t have an account?{" "}
+                  <Text style={authStyles.link}>Sign up</Text>
+                </Text>
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={[authStyles.authButton, loading && authStyles.buttonDisabled]}
-              onPress={handleSignIn}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              <Text style={authStyles.buttonText}>{loading ? "Signing In..." : "Sign In"}</Text>
-            </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={authStyles.dividerContainer}>
-              <View style={authStyles.divider} />
-              <Text style={authStyles.dividerText}>OR</Text>
-              <View style={authStyles.divider} />
-            </View>
-
-            {/* Google Sign-In Button */}
-            <TouchableOpacity
-              style={authStyles.googleButton}
-              onPress={handleGoogleSignIn}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="logo-google" size={24} color="#fff" />
-              <Text style={authStyles.googleButtonText}>Sign In with Google</Text>
-            </TouchableOpacity>
-
-            {/* Sign Up Link */}
-            <TouchableOpacity
-              style={authStyles.linkContainer}
-              onPress={() => router.push("/(auth)/sign-up")}
-            >
-              <Text style={authStyles.linkText}>
-                Don&apos;t have an account? <Text style={authStyles.link}>Sign up</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
           )}
         </ScrollView>
       </KeyboardAvoidingView>

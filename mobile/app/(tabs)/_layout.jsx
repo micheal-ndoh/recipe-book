@@ -1,9 +1,8 @@
 import { useAuth } from "@clerk/clerk-expo";
-import { TouchableOpacity } from "react-native";
-import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import { Redirect, Tabs } from "expo-router";
+import { TouchableOpacity } from "react-native";
 import { COLORS } from "../../constants/colors";
 
 const TabsLayout = () => {
@@ -15,7 +14,7 @@ const TabsLayout = () => {
 
   if (!isLoaded) return null;
 
-  if (!isSignedIn) return <Redirect href={"/(auth)/sign-in"} />;
+  if (!isSignedIn) return <Redirect href="/sign-in" />;
 
   return (
     <Tabs
@@ -37,7 +36,7 @@ const TabsLayout = () => {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="recipes"
         options={{
           title: "Recipes",
           tabBarIcon: ({ color, size }) => (
@@ -47,7 +46,10 @@ const TabsLayout = () => {
           headerBackground: () => (
             <BlurView intensity={50} style={{ flex: 1 }} />
           ),
-          headerStyle: { backgroundColor: "transparent", height: 0 },
+          headerStyle: { backgroundColor: COLORS.background },
+          headerTitleStyle: { color: COLORS.text, fontWeight: "600" },
+          headerTitleAlign: "center",
+          headerTransparent: false,
           headerRight: () => (
             <TouchableOpacity
               onPress={handleSignOut}

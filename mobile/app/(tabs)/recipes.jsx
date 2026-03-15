@@ -1,16 +1,21 @@
-import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl } from "react-native";
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import { MealAPI } from "../../services/mealAPI";
-import { homeStyles } from "../../assets/styles/home.styles";
-import { Image } from "expo-image";
-import { COLORS } from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { homeStyles } from "../../assets/styles/home.styles";
 import CategoryFilter from "../../components/CategoryFilter";
-import RecipeCard from "../../components/RecipeCard";
 import LoadingSpinner from "../../components/LoadingSpinner";
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import RecipeCard from "../../components/RecipeCard";
+import { COLORS } from "../../constants/colors";
+import { MealAPI } from "../../services/mealAPI";
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -21,7 +26,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -32,10 +37,7 @@ const HomeScreen = () => {
       ]);
 
       const transformedCategories = apiCategories
-        .filter(
-          (cat) =>
-            !["Goat", "Chicken", "Pork"].includes(cat.strCategory)
-        )
+        .filter((cat) => !["Goat", "Chicken", "Pork"].includes(cat.strCategory))
         .map((cat, index) => ({
           id: index + 1,
           name: cat.strCategory,
@@ -60,7 +62,7 @@ const HomeScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   const loadCategoryData = async (category) => {
     try {
@@ -91,7 +93,8 @@ const HomeScreen = () => {
     loadData();
   }, []);
 
-  if (loading && !refreshing) return <LoadingSpinner message="Loading delicions recipes..." />;
+  if (loading && !refreshing)
+    return <LoadingSpinner message="Loading delicions recipes..." />;
 
   return (
     <View style={homeStyles.container}>
@@ -106,7 +109,6 @@ const HomeScreen = () => {
         }
         contentContainerStyle={homeStyles.scrollContent}
       >
-
         {/* FEATURED SECTION */}
         {featuredRecipe && (
           <View style={homeStyles.featuredSection}>
@@ -135,8 +137,14 @@ const HomeScreen = () => {
                     <View style={homeStyles.featuredMeta}>
                       {featuredRecipe.area && (
                         <View style={homeStyles.metaItem}>
-                          <Ionicons name="location-outline" size={16} color={COLORS.white} />
-                          <Text style={homeStyles.metaText}>{featuredRecipe.area}</Text>
+                          <Ionicons
+                            name="location-outline"
+                            size={16}
+                            color={COLORS.white}
+                          />
+                          <Text style={homeStyles.metaText}>
+                            {featuredRecipe.area}
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -173,9 +181,15 @@ const HomeScreen = () => {
             />
           ) : (
             <View style={homeStyles.emptyState}>
-              <Ionicons name="restaurant-outline" size={64} color={COLORS.textLight} />
+              <Ionicons
+                name="restaurant-outline"
+                size={64}
+                color={COLORS.textLight}
+              />
               <Text style={homeStyles.emptyTitle}>No recipes found</Text>
-              <Text style={homeStyles.emptyDescription}>Try a different category</Text>
+              <Text style={homeStyles.emptyDescription}>
+                Try a different category
+              </Text>
             </View>
           )}
         </View>
