@@ -29,7 +29,8 @@
       "prefixes": [
         "mobile://",
         "exp://",
-        "http://localhost:8081"
+        "http://localhost:8081",
+        "com.recipe.book://"
       ],
       "config": {
         "screens": {
