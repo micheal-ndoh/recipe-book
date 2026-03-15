@@ -38,6 +38,11 @@ const SignInScreen = () => {
 
   // Get the OAuth redirect URL for Clerk
   const getRedirectUrl = () => {
+    // For Android physical device, use the package scheme
+    if (Platform.OS === "android") {
+      // Use the Linking API to create the proper URL for the app
+      return `com.recipe.book://oauth-native-callback`;
+    }
     // For web development
     if (
       typeof window !== "undefined" &&
